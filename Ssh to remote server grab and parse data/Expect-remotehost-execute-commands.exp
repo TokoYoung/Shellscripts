@@ -1,0 +1,42 @@
+#!/usr/bin/expect
+log_user 0
+ 
+set env(TERM) vt100
+## Access CLI
+set loginUser "user"
+set loginPassword "password"
+set mgmtServerAddress $mgmtServerAddress
+
+
+## Expect Parameters
+set timeout 3
+set successMsg "Status: Success"
+set failureMsg "Status: Failure"
+
+spawn -noecho /usr/bin/ssh -l $loginUser $mgmtServerAddress  
+expect "connecting (yes/no)?" {send yes\r}
+expect "word:" {send $loginPassword\r}
+
+set timeout 10
+
+##interact with SSH
+
+expect "*\$ " {send "\r"}
+
+## Su  progress user 
+send "sudo su - progress\r"
+expect "password for $loginUser:" {send $loginPassword\r}
+expect "*\$ " {send "\r"}
+log_user 1 
+## Execute DB check script
+
+send  "/home/progress/scripts/db_check.sh\r"
+
+expect "*\$ " {send "\r"}
+
+send "exit\r"
+
+expect "*\$ " {send "\r"}
+
+send "exit\r"
+expect eof
